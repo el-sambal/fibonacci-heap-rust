@@ -54,7 +54,9 @@ impl<T: Ord> FibonacciHeap<T> {
                 if (*popped).right != popped {
                     FibonacciHeap::remove_from_circular_list(popped, (*popped).right);
                     self.min = (*popped).right;
+                    Self::confirm_integrity(self.min);
                     self.consolidate();
+                    Self::confirm_integrity(self.min);
                 } else {
                     self.min = std::ptr::null_mut();
                 }
@@ -120,10 +122,7 @@ impl<T: Ord> FibonacciHeap<T> {
     /// changed; its key and pointers stay intact.
     unsafe fn remove_from_circular_list(elem: *const Node<T>, list: *mut Node<T>) {
         debug_assert!(!std::ptr::eq(elem, list));
-        if std::ptr::eq((*elem).right, elem) {
-            // the list had only one element, and we remove it. No need to do anything
-            return;
-        }
+        debug_assert!(!std::ptr::eq((*elem).right, elem));
         (*(*elem).right).left = (*elem).left;
         (*(*elem).left).right = (*elem).right;
     }
@@ -142,6 +141,7 @@ impl<T: Ord> FibonacciHeap<T> {
         while !finished {
             // iterate over nodes in root list
             node_it = (*node_it).right;
+            FibonacciHeap::confirm_integrity(node_it);
             let mut x = node_it;
             if std::ptr::eq(x, last) {
                 finished = true;
@@ -155,16 +155,19 @@ impl<T: Ord> FibonacciHeap<T> {
                 }
 
                 // make y a child of x
+                Self::confirm_integrity(self.min);
                 FibonacciHeap::remove_from_circular_list(y, x);
                 (*x).degree += 1;
                 if !(*x).child.is_null() {
-                    FibonacciHeap::add_node_to_nonempty_circular_list(y, (*x).child);
+                    Self::add_node_to_nonempty_circular_list(y, (*x).child);
                 } else {
                     (*y).left = y;
                     (*y).right = y;
                     (*x).child = y;
                 }
                 (*y).mark = false;
+                (*y).parent = x;
+                Self::confirm_integrity(self.min);
 
                 arr[d] = std::ptr::null_mut();
                 d += 1;
@@ -181,6 +184,25 @@ impl<T: Ord> FibonacciHeap<T> {
             }
         }
         self.min = min;
+    }
+
+    /// For debugging
+    unsafe fn confirm_integrity(list: *mut Node<T>) {
+        let mut node_it = (*list).right;
+        loop {
+            assert!((*(*node_it).right).left == node_it);
+            assert!((*(*node_it).left).right == node_it);
+            assert!((*(*node_it).left).parent == (*node_it).parent);
+            assert!((*node_it).child.is_null() || (*(*node_it).child).parent == node_it);
+            if !(*node_it).child.is_null() {
+                Self::confirm_integrity((*node_it).child);
+            }
+
+            node_it = (*node_it).right;
+            if node_it == list {
+                break;
+            }
+        }
     }
 }
 
