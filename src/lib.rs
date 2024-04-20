@@ -15,6 +15,37 @@ impl<T: Ord> FibonacciHeap<T> {
         }
     }
 
+    pub fn is_empty(&self) -> bool {
+        !self.min.is_null()
+    }
+
+    pub fn from_merge(heap1: FibonacciHeap<T>, heap2: FibonacciHeap<T>) -> FibonacciHeap<T> {
+        let mut heap = FibonacciHeap::<T>::new();
+        if heap1.is_empty() {
+            return heap2;
+        } else if heap2.is_empty() {
+            return heap1;
+        }
+        unsafe {
+            // concatenate root lists
+            // (in this case, implemented such that heap1.min and heap2.min become neighbors)
+            let prev_heap1_min_right = (*heap1.min).right;
+            let prev_heap2_min_left = (*heap2.min).left;
+            (*heap1.min).right = heap2.min;
+            (*heap2.min).left = heap1.min;
+            (*prev_heap1_min_right).left = prev_heap2_min_left;
+            (*prev_heap2_min_left).right = prev_heap1_min_right;
+
+            heap.min = if (*heap1.min).key < (*heap2.min).key {
+                heap1.min
+            } else {
+                heap2.min
+            };
+        }
+        heap.n = heap1.n + heap2.n;
+        heap
+    }
+
     pub fn push(&mut self, item: T) {
         let node: *mut Node<T> = Box::into_raw(Box::new(Node {
             key: item,
