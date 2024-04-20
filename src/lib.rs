@@ -149,6 +149,7 @@ impl<T: Ord> FibonacciHeap<T> {
             let mut d = (*x).degree;
             while !arr[d].is_null() {
                 let mut y = arr[d];
+                debug_assert!(!std::ptr::eq(x, y));
                 if (*x).key > (*y).key {
                     std::mem::swap(&mut x, &mut y);
                 }
@@ -225,7 +226,70 @@ mod tests {
     }
 
     #[test]
-    fn test_stuff() {
+    fn test_push_and_pop_one_element() {
+        let mut fh: FibonacciHeap<usize> = FibonacciHeap::new();
+        fh.push(1);
+        assert_eq!(fh.pop(), Some(1));
+    }
+
+    #[test]
+    fn test_push_and_pop_two_elements_1() {
+        let mut fh: FibonacciHeap<usize> = FibonacciHeap::new();
+        fh.push(1);
+        fh.push(2);
+        assert_eq!(fh.pop(), Some(1));
+        assert_eq!(fh.pop(), Some(2));
+        assert_eq!(fh.pop(), None);
+    }
+
+    #[test]
+    fn test_push_and_pop_two_elements_2() {
+        let mut fh: FibonacciHeap<usize> = FibonacciHeap::new();
+        fh.push(2);
+        fh.push(1);
+        assert_eq!(fh.pop(), Some(1));
+        assert_eq!(fh.pop(), Some(2));
+        assert_eq!(fh.pop(), None);
+    }
+
+    #[test]
+    fn test_push_and_pop_three_elements_1() {
+        let mut fh: FibonacciHeap<usize> = FibonacciHeap::new();
+        fh.push(2);
+        fh.push(1);
+        fh.push(3);
+        assert_eq!(fh.pop(), Some(1));
+        assert_eq!(fh.pop(), Some(2));
+        assert_eq!(fh.pop(), Some(3));
+        assert_eq!(fh.pop(), None);
+    }
+
+    #[test]
+    fn test_push_and_pop_three_elements_2() {
+        let mut fh: FibonacciHeap<usize> = FibonacciHeap::new();
+        fh.push(1);
+        fh.push(3);
+        fh.push(2);
+        assert_eq!(fh.pop(), Some(1));
+        assert_eq!(fh.pop(), Some(2));
+        assert_eq!(fh.pop(), Some(3));
+        assert_eq!(fh.pop(), None);
+    }
+
+    #[test]
+    fn test_push_and_pop_three_elements_3() {
+        let mut fh: FibonacciHeap<usize> = FibonacciHeap::new();
+        fh.push(1);
+        fh.push(2);
+        fh.push(3);
+        assert_eq!(fh.pop(), Some(1));
+        assert_eq!(fh.pop(), Some(2));
+        assert_eq!(fh.pop(), Some(3));
+        assert_eq!(fh.pop(), None);
+    }
+
+    #[test]
+    fn test_push_many_then_pop_many() {
         let mut fh: FibonacciHeap<i32> = FibonacciHeap::new();
         fh.push(42);
         fh.push(-42);
@@ -236,6 +300,7 @@ mod tests {
         }
         let mut prev = i32::max_value();
         while let Some(popped) = fh.pop() {
+            println!("popped!");
             assert!(popped >= prev);
             prev = popped;
         }
