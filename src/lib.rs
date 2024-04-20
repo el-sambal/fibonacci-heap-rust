@@ -19,7 +19,7 @@ impl<T: Ord> FibonacciHeap<T> {
         !self.min.is_null()
     }
 
-    pub fn from_merge(heap1: FibonacciHeap<T>, heap2: FibonacciHeap<T>) -> FibonacciHeap<T> {
+    pub fn from_meld(heap1: FibonacciHeap<T>, heap2: FibonacciHeap<T>) -> FibonacciHeap<T> {
         let mut heap = FibonacciHeap::<T>::new();
         if heap1.is_empty() {
             return heap2;
@@ -27,14 +27,7 @@ impl<T: Ord> FibonacciHeap<T> {
             return heap1;
         }
         unsafe {
-            // concatenate root lists
-            // (in this case, implemented such that heap1.min and heap2.min become neighbors)
-            let prev_heap1_min_right = (*heap1.min).right;
-            let prev_heap2_min_left = (*heap2.min).left;
-            (*heap1.min).right = heap2.min;
-            (*heap2.min).left = heap1.min;
-            (*prev_heap1_min_right).left = prev_heap2_min_left;
-            (*prev_heap2_min_left).right = prev_heap1_min_right;
+            FibonacciHeap::concatenate_circular_lists(heap1.min, heap2.min);
 
             heap.min = if (*heap1.min).key < (*heap2.min).key {
                 heap1.min
@@ -44,6 +37,31 @@ impl<T: Ord> FibonacciHeap<T> {
         }
         heap.n = heap1.n + heap2.n;
         heap
+    }
+
+    pub fn pop(&mut self) -> T {
+        let popped = self.min;
+        if !popped.is_null() {
+            unsafe {
+                let mut child = (*popped).child;
+                if !child.is_null() {
+                    while !(*child).parent.is_null() {
+                        (*child).parent = std::ptr::null_mut();
+                        child = (*child).right;
+                    }
+                }
+                FibonacciHeap::concatenate_circular_lists(child, popped);
+                if (*popped).right != popped {
+                    FibonacciHeap::remove_from_circular_list(popped, (*popped).right);
+                    self.min = (*popped).right;
+                } else {
+                    self.min = std::ptr::null_mut();
+                    self.consolidate();
+                }
+            }
+            self.n -= 1;
+        }
+        unsafe { Box::from_raw(popped).key }
     }
 
     pub fn push(&mut self, item: T) {
@@ -63,11 +81,7 @@ impl<T: Ord> FibonacciHeap<T> {
                 (*node).right = node;
                 self.min = node;
             } else {
-                // put new element in root list (insert it to the right of current min)
-                (*node).right = (*self.min).right;
-                (*node).left = self.min;
-                (*(*self.min).right).left = node;
-                (*self.min).right = node;
+                FibonacciHeap::add_node_to_nonempty_circular_list(node, self.min);
 
                 if (*node).key < (*self.min).key {
                     self.min = node;
@@ -75,6 +89,45 @@ impl<T: Ord> FibonacciHeap<T> {
             }
         }
         self.n += 1;
+    }
+
+    /// Adds a node to a circular doubly linked list. Both inputs must not be null pointers.
+    unsafe fn add_node_to_nonempty_circular_list(new_item: *mut Node<T>, list: *mut Node<T>) {
+        (*new_item).right = (*list).right;
+        (*new_item).left = list;
+        (*(*list).right).left = new_item;
+        (*list).right = new_item;
+    }
+
+    /// Concatenates two circular doubly linked lists.
+    unsafe fn concatenate_circular_lists(list1: *mut Node<T>, list2: *mut Node<T>) {
+        if list1.is_null() || list2.is_null() {
+            return;
+        }
+        let prev_list1_right = (*list1).right;
+        let prev_list2_left = (*list2).left;
+        (*list1).right = list2;
+        (*list2).left = list1;
+        (*prev_list1_right).left = prev_list2_left;
+        (*prev_list2_left).right = prev_list1_right;
+    }
+
+    /// Removes an element from a circular doubly linked list. The specified element must be a
+    /// member of this list, otherwise it is UB. `elem` and `list` should not be equal, otherwise
+    /// it is UB. This function does no freeing whatsoever. The node pointed to by `elem` is not
+    /// changed; its key and pointers stay intact.
+    unsafe fn remove_from_circular_list(elem: *const Node<T>, list: *mut Node<T>) {
+        debug_assert!(!std::ptr::eq(elem, list));
+        if std::ptr::eq((*elem).right, elem) {
+            // the list had only one element, and we remove it. No need to do anything
+            return;
+        }
+        (*(*elem).right).left = (*elem).left;
+        (*(*elem).left).right = (*elem).right;
+    }
+
+    unsafe fn consolidate(&self) {
+        todo!()
     }
 }
 
