@@ -25,14 +25,18 @@ impl<T: Ord> FibonacciHeap<T> {
             degree: 0,
             mark: false,
         }));
-        unsafe { // my first `unsafe` ever! :) 20 april 2024
+        unsafe {
+            // my first `unsafe` ever! :) 20 april 2024
             if self.min.is_null() {
                 (*node).left = node;
                 (*node).right = node;
                 self.min = node;
             } else {
-                // put new element in root list
-                // TODO
+                // put new element in root list (insert it to the right of current min)
+                (*node).right = (*self.min).right;
+                (*node).left = self.min;
+                (*(*self.min).right).left = node;
+                (*self.min).right = node;
 
                 if (*node).key < (*self.min).key {
                     self.min = node;
