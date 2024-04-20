@@ -16,7 +16,7 @@ impl<T: Ord> FibonacciHeap<T> {
     }
 
     pub fn push(&mut self, item: T) {
-        let node: Node<T> = Node {
+        let node: *mut Node<T> = Box::into_raw(Box::new(Node {
             key: item,
             left: std::ptr::null_mut(),
             right: std::ptr::null_mut(),
@@ -24,11 +24,20 @@ impl<T: Ord> FibonacciHeap<T> {
             child: std::ptr::null_mut(),
             degree: 0,
             mark: false,
-        };
-        if self.min.is_null() {
-            // TODO
-        } else {
-            // TODO
+        }));
+        unsafe { // my first `unsafe` ever! :) 20 april 2024
+            if self.min.is_null() {
+                (*node).left = node;
+                (*node).right = node;
+                self.min = node;
+            } else {
+                // put new element in root list
+                // TODO
+
+                if (*node).key < (*self.min).key {
+                    self.min = node;
+                }
+            }
         }
         self.n += 1;
     }
