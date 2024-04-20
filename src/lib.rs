@@ -128,8 +128,64 @@ impl<T: Ord> FibonacciHeap<T> {
         (*(*elem).left).right = (*elem).right;
     }
 
-    unsafe fn consolidate(&self) {
-        todo!()
+    unsafe fn consolidate(&mut self) {
+        // if arr[i] = some node, then that node is a root with degree i
+        let mut arr: Vec<*mut Node<T>> = vec![
+                std::ptr::null_mut();
+                (self.n as f64).log((1.0 + (5f64).sqrt()) / 2.0).floor() as usize + 1 // :-)
+            ];
+
+        // make sure that each node in the root list has a unique degree
+        let last = (*self.min).left;
+        let mut node_it = last;
+        let mut finished = false;
+        while !finished {
+            // iterate over nodes in root list
+            node_it = (*node_it).right;
+            let mut x = node_it;
+            if std::ptr::eq(x, last) {
+                finished = true;
+            }
+            let mut d = (*x).degree;
+            while !arr[d].is_null() {
+                let mut y = arr[d];
+                if (*x).key > (*y).key {
+                    std::mem::swap(&mut x, &mut y);
+                }
+
+                // make y a child of x
+                FibonacciHeap::remove_from_circular_list(y, x);
+                (*x).degree += 1;
+                if !(*x).child.is_null() {
+                    FibonacciHeap::add_node_to_nonempty_circular_list(y, (*x).child);
+                } else {
+                    (*y).left = y;
+                    (*y).right = y;
+                    (*x).child = y;
+                }
+                (*y).mark = false;
+
+                arr[d] = std::ptr::null_mut();
+                d += 1;
+            }
+            arr[d] = x;
+        }
+
+        self.min = std::ptr::null_mut();
+        // root list is intact, but we need to find out who is the new `min`
+        let mut min: *mut Node<T> = std::ptr::null_mut();
+        for node in arr {
+            if !node.is_null() && (min.is_null() || (*node).key < (*min).key) {
+                min = node;
+            }
+        }
+        self.min = min;
+    }
+}
+
+impl<T> Drop for FibonacciHeap<T> {
+    fn drop(&mut self) {
+        println!("Dropping still has to be implemented. I\'m gonna leak memory now!");
     }
 }
 
@@ -166,5 +222,22 @@ mod tests {
         let _: FibonacciHeap<String> = FibonacciHeap::new();
         let _: FibonacciHeap<i64> = FibonacciHeap::new();
         let _: FibonacciHeap<u8> = FibonacciHeap::new();
+    }
+
+    #[test]
+    fn test_stuff() {
+        let mut fh: FibonacciHeap<i32> = FibonacciHeap::new();
+        fh.push(42);
+        fh.push(-42);
+        fh.push(-137);
+        fh.push(137);
+        for i in 0..1000 {
+            fh.push((i * i * i) % 3000);
+        }
+        let mut prev = i32::max_value();
+        while let Some(popped) = fh.pop() {
+            assert!(popped >= prev);
+            prev = popped;
+        }
     }
 }
