@@ -39,7 +39,7 @@ impl<T: Ord> FibonacciHeap<T> {
         heap
     }
 
-    pub fn pop(&mut self) -> T {
+    pub fn pop(&mut self) -> Option<T> {
         let popped = self.min;
         if !popped.is_null() {
             unsafe {
@@ -54,14 +54,16 @@ impl<T: Ord> FibonacciHeap<T> {
                 if (*popped).right != popped {
                     FibonacciHeap::remove_from_circular_list(popped, (*popped).right);
                     self.min = (*popped).right;
+                    self.consolidate();
                 } else {
                     self.min = std::ptr::null_mut();
-                    self.consolidate();
                 }
             }
             self.n -= 1;
+            unsafe { Some(Box::from_raw(popped).key) }
+        } else {
+            None
         }
-        unsafe { Box::from_raw(popped).key }
     }
 
     pub fn push(&mut self, item: T) {
@@ -153,4 +155,16 @@ struct Node<T> {
     /// A boolean flag which is true if and only if this node has lost a child node since the last time
     /// it was made the child of another node
     mark: bool,
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::FibonacciHeap;
+
+    #[test]
+    fn test_new() {
+        let _: FibonacciHeap<String> = FibonacciHeap::new();
+        let _: FibonacciHeap<i64> = FibonacciHeap::new();
+        let _: FibonacciHeap<u8> = FibonacciHeap::new();
+    }
 }
