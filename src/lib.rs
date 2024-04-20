@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 /// This is a min-Fibonacci heap.
 pub struct FibonacciHeap<T> {
     /// The current number of nodes in the Fibonacci heap
@@ -136,16 +138,17 @@ impl<T: Ord> FibonacciHeap<T> {
             ];
 
         // make sure that each node in the root list has a unique degree
-        let last = (*self.min).left;
-        let mut node_it = last;
-        let mut finished = false;
-        while !finished {
+        let mut node_it = self.min;
+        let mut visited_nodes: HashSet<*mut Node<T>> = HashSet::new();
+        loop {
             // iterate over nodes in root list
-            node_it = (*node_it).right;
             let mut x = node_it;
-            if std::ptr::eq(x, last) {
-                finished = true;
+
+            if visited_nodes.contains(&node_it) {
+                break;
             }
+            visited_nodes.insert(node_it);
+
             let mut d = (*x).degree;
             while !arr[d].is_null() {
                 let mut y = arr[d];
@@ -170,6 +173,8 @@ impl<T: Ord> FibonacciHeap<T> {
                 d += 1;
             }
             arr[d] = x;
+
+            node_it = (*node_it).right;
         }
 
         self.min = std::ptr::null_mut();
