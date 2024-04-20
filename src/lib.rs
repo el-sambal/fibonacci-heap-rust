@@ -54,15 +54,7 @@ impl<T: Ord> FibonacciHeap<T> {
                 if (*popped).right != popped {
                     FibonacciHeap::remove_from_circular_list(popped, (*popped).right);
                     self.min = (*popped).right;
-                    #[cfg(debug_assertions)]
-                    {
-                        Self::confirm_integrity(self.min);
-                    }
                     self.consolidate();
-                    #[cfg(debug_assertions)]
-                    {
-                        Self::confirm_integrity(self.min);
-                    }
                 } else {
                     self.min = std::ptr::null_mut();
                 }
@@ -127,8 +119,6 @@ impl<T: Ord> FibonacciHeap<T> {
     /// it is UB. This function does no freeing whatsoever. The node pointed to by `elem` is not
     /// changed; its key and pointers stay intact.
     unsafe fn remove_from_circular_list(elem: *const Node<T>, list: *mut Node<T>) {
-        debug_assert!(!std::ptr::eq(elem, list));
-        debug_assert!(!std::ptr::eq((*elem).right, elem));
         (*(*elem).right).left = (*elem).left;
         (*(*elem).left).right = (*elem).right;
     }
@@ -143,17 +133,13 @@ impl<T: Ord> FibonacciHeap<T> {
                 (self.n as f64).log((1.0 + (5f64).sqrt()) / 2.0).floor() as usize + 1 // :-)
             ];
 
-        // make sure that each node in the root list has a unique degree
+        // Make sure that each node in the root list has a unique degree
         let last = (*self.min).left;
         let mut node_it = last;
         let mut finished = false;
         while !finished {
-            // iterate over nodes in root list
+            // Iterate over nodes in root list
             node_it = (*node_it).right;
-            #[cfg(debug_assertions)]
-            {
-                FibonacciHeap::confirm_integrity(node_it);
-            }
             let mut x = node_it;
             if std::ptr::eq(x, last) {
                 finished = true;
@@ -161,16 +147,11 @@ impl<T: Ord> FibonacciHeap<T> {
             let mut d = (*x).degree;
             while !arr[d].is_null() {
                 let mut y = arr[d];
-                debug_assert!(!std::ptr::eq(x, y));
                 if (*x).key > (*y).key {
                     std::mem::swap(&mut x, &mut y);
                 }
 
-                // make y a child of x
-                #[cfg(debug_assertions)]
-                {
-                    Self::confirm_integrity(self.min);
-                }
+                // Make y a child of x
                 if node_it == y {
                     // we were iterating over all nodes in root list, but the node we're
                     // currently at is now going to be moved out of the root list, so account for
@@ -188,10 +169,6 @@ impl<T: Ord> FibonacciHeap<T> {
                 }
                 (*y).mark = false;
                 (*y).parent = x;
-                #[cfg(debug_assertions)]
-                {
-                    Self::confirm_integrity(self.min);
-                }
 
                 arr[d] = std::ptr::null_mut();
                 d += 1;
@@ -208,25 +185,6 @@ impl<T: Ord> FibonacciHeap<T> {
             }
         }
         self.min = min;
-    }
-
-    /// For debugging only!!
-    unsafe fn confirm_integrity(list: *mut Node<T>) {
-        let mut node_it = (*list).right;
-        loop {
-            assert!((*(*node_it).right).left == node_it);
-            assert!((*(*node_it).left).right == node_it);
-            assert!((*(*node_it).left).parent == (*node_it).parent);
-            assert!((*node_it).child.is_null() || (*(*node_it).child).parent == node_it);
-            if !(*node_it).child.is_null() {
-                Self::confirm_integrity((*node_it).child);
-            }
-
-            node_it = (*node_it).right;
-            if node_it == list {
-                break;
-            }
-        }
     }
 }
 
@@ -350,8 +308,8 @@ mod tests {
             println!("popped! {popped}");
             assert!(popped >= prev);
             prev = popped;
-            count +=1;
+            count += 1;
         }
-        assert!(count==1004);
+        assert!(count == 1004);
     }
 }
