@@ -171,6 +171,12 @@ impl<T: Ord> FibonacciHeap<T> {
                 {
                     Self::confirm_integrity(self.min);
                 }
+                if node_it == y {
+                    // we were iterating over all nodes in root list, but the node we're
+                    // currently at is now going to be moved out of the root list, so account for
+                    // that
+                    node_it = (*node_it).left;
+                }
                 FibonacciHeap::remove_from_circular_list(y, x);
                 (*x).degree += 1;
                 if !(*x).child.is_null() {
@@ -338,11 +344,14 @@ mod tests {
         for i in 0..1000 {
             fh.push((i * i * i) % 3000);
         }
-        let mut prev = i32::max_value();
+        let mut prev = i32::min_value();
+        let mut count = 0;
         while let Some(popped) = fh.pop() {
-            println!("popped!");
+            println!("popped! {popped}");
             assert!(popped >= prev);
             prev = popped;
+            count +=1;
         }
+        assert!(count==1004);
     }
 }
