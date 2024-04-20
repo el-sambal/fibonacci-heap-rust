@@ -54,9 +54,15 @@ impl<T: Ord> FibonacciHeap<T> {
                 if (*popped).right != popped {
                     FibonacciHeap::remove_from_circular_list(popped, (*popped).right);
                     self.min = (*popped).right;
-                    Self::confirm_integrity(self.min);
+                    #[cfg(debug_assertions)]
+                    {
+                        Self::confirm_integrity(self.min);
+                    }
                     self.consolidate();
-                    Self::confirm_integrity(self.min);
+                    #[cfg(debug_assertions)]
+                    {
+                        Self::confirm_integrity(self.min);
+                    }
                 } else {
                     self.min = std::ptr::null_mut();
                 }
@@ -127,6 +133,9 @@ impl<T: Ord> FibonacciHeap<T> {
         (*(*elem).left).right = (*elem).right;
     }
 
+    /// This method basically fixes up the Fibonacci heap (it is called by the `pop()` method) such
+    /// that every root in the root list has a unique degree. This reduces the number of trees and
+    /// that is good.
     unsafe fn consolidate(&mut self) {
         // if arr[i] = some node, then that node is a root with degree i
         let mut arr: Vec<*mut Node<T>> = vec![
@@ -141,7 +150,10 @@ impl<T: Ord> FibonacciHeap<T> {
         while !finished {
             // iterate over nodes in root list
             node_it = (*node_it).right;
-            FibonacciHeap::confirm_integrity(node_it);
+            #[cfg(debug_assertions)]
+            {
+                FibonacciHeap::confirm_integrity(node_it);
+            }
             let mut x = node_it;
             if std::ptr::eq(x, last) {
                 finished = true;
@@ -155,7 +167,10 @@ impl<T: Ord> FibonacciHeap<T> {
                 }
 
                 // make y a child of x
-                Self::confirm_integrity(self.min);
+                #[cfg(debug_assertions)]
+                {
+                    Self::confirm_integrity(self.min);
+                }
                 FibonacciHeap::remove_from_circular_list(y, x);
                 (*x).degree += 1;
                 if !(*x).child.is_null() {
@@ -167,7 +182,10 @@ impl<T: Ord> FibonacciHeap<T> {
                 }
                 (*y).mark = false;
                 (*y).parent = x;
-                Self::confirm_integrity(self.min);
+                #[cfg(debug_assertions)]
+                {
+                    Self::confirm_integrity(self.min);
+                }
 
                 arr[d] = std::ptr::null_mut();
                 d += 1;
@@ -186,7 +204,7 @@ impl<T: Ord> FibonacciHeap<T> {
         self.min = min;
     }
 
-    /// For debugging
+    /// For debugging only!!
     unsafe fn confirm_integrity(list: *mut Node<T>) {
         let mut node_it = (*list).right;
         loop {
