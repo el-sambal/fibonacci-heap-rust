@@ -334,7 +334,7 @@ fn test_heap_meld_2() {
 }
 
 #[test]
-fn test_from_slice() {
+fn test_from_array() {
     let fh1: FibonacciHeap<String> = FibonacciHeap::from([
         "Hello".to_string(),
         "test".to_string(),
@@ -415,4 +415,47 @@ fn test_from_vec() {
     assert_eq!(fh.pop(), Some("to".to_string()));
     assert_eq!(fh.pop(), Some("works".to_string()));
     assert_eq!(fh.pop(), None);
+}
+#[test]
+fn test_from_to_vec() {
+    let fh1: FibonacciHeap<String> = FibonacciHeap::from(vec![
+        "Hello".to_string(),
+        "test".to_string(),
+        "to".to_string(),
+        "make".to_string(),
+        "sure".to_string(),
+        "that".to_string(),
+        "melding".to_string(),
+        "works".to_string(),
+        "the".to_string(),
+    ]);
+    let fh2: FibonacciHeap<String> = FibonacciHeap::from(vec![
+        "World".to_string(),
+        ",".to_string(),
+        "This".to_string(),
+        "is".to_string(),
+        "a".to_string(),
+        "Fibonacci".to_string(),
+        "heap".to_string(),
+    ]);
+    let fh = Vec::from(FibonacciHeap::from_meld(fh1, fh2));
+    let should_be = vec![
+        ",".to_string(),
+        "Fibonacci".to_string(),
+        "Hello".to_string(),
+        "This".to_string(),
+        "World".to_string(),
+        "a".to_string(),
+        "heap".to_string(),
+        "is".to_string(),
+        "make".to_string(),
+        "melding".to_string(),
+        "sure".to_string(),
+        "test".to_string(),
+        "that".to_string(),
+        "the".to_string(),
+        "to".to_string(),
+        "works".to_string(),
+    ];
+    assert_eq!(fh, should_be);
 }

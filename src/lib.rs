@@ -344,6 +344,7 @@ impl<T> Drop for FibonacciHeap<T> {
 }
 
 impl<T: Ord, const N: usize> From<[T; N]> for FibonacciHeap<T> {
+    /// Constructs a Fibonacci heap from an array of items.
     fn from(elems: [T; N]) -> Self {
         let mut heap = FibonacciHeap::new();
         for elem in elems {
@@ -354,12 +355,25 @@ impl<T: Ord, const N: usize> From<[T; N]> for FibonacciHeap<T> {
 }
 
 impl<T: Ord> From<Vec<T>> for FibonacciHeap<T> {
+    /// Constructs a Fibonacci heap from a `Vec` of items.
     fn from(elems: Vec<T>) -> Self {
         let mut heap = FibonacciHeap::new();
         for elem in elems {
             heap.push(elem);
         }
         heap
+    }
+}
+
+impl<T: Ord> From<FibonacciHeap<T>> for Vec<T> {
+    /// Constructs a `Vec` of items from a `FibonacciHeap`. The items in the `Vec` are sorted in
+    /// increasing order (minimal element first). The Fibonacci heap is consumed.
+    fn from(mut heap: FibonacciHeap<T>) -> Vec<T> {
+        let mut res = vec![];
+        while let Some(popped) = heap.pop() {
+            res.push(popped);
+        }
+        res
     }
 }
 
