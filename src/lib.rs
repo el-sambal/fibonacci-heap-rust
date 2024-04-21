@@ -115,10 +115,10 @@ impl<T: Ord> FibonacciHeap<T> {
     ///
     /// ```
     /// use fibonacci_heap_rust::FibonacciHeap;
-    /// let mut heap1: FibonacciHeap<String> = FibonacciHeap::new();
+    /// let mut heap1: FibonacciHeap<String> = FibonacciHeap::from(
+    ///     ["Hello".to_string(), "World".to_string()]
+    /// );
     /// let mut heap2: FibonacciHeap<String> = FibonacciHeap::new();
-    /// heap1.push("Hello".to_string());
-    /// heap1.push("World".to_string());
     /// // heap2 is empty
     /// let mut heap3: FibonacciHeap<String> = FibonacciHeap::from_meld(heap1,heap2);
     /// assert_eq!(heap3.pop(), Some("Hello".to_string()));
@@ -340,6 +340,26 @@ impl<T> Drop for FibonacciHeap<T> {
         unsafe {
             drop_recursive(self.min);
         }
+    }
+}
+
+impl<T: Ord, const N: usize> From<[T; N]> for FibonacciHeap<T> {
+    fn from(elems: [T; N]) -> Self {
+        let mut heap = FibonacciHeap::new();
+        for elem in elems {
+            heap.push(elem);
+        }
+        heap
+    }
+}
+
+impl<T: Ord> From<Vec<T>> for FibonacciHeap<T> {
+    fn from(elems: Vec<T>) -> Self {
+        let mut heap = FibonacciHeap::new();
+        for elem in elems {
+            heap.push(elem);
+        }
+        heap
     }
 }
 

@@ -332,3 +332,87 @@ fn test_heap_meld_2() {
     assert_eq!(fh.pop(), Some("Mundo".to_string()));
     assert_eq!(fh.pop(), None);
 }
+
+#[test]
+fn test_from_slice() {
+    let fh1: FibonacciHeap<String> = FibonacciHeap::from([
+        "Hello".to_string(),
+        "test".to_string(),
+        "to".to_string(),
+        "make".to_string(),
+        "sure".to_string(),
+        "that".to_string(),
+        "melding".to_string(),
+        "works".to_string(),
+        "the".to_string(),
+    ]);
+    let fh2: FibonacciHeap<String> = FibonacciHeap::from([
+        "World".to_string(),
+        ",".to_string(),
+        "This".to_string(),
+        "is".to_string(),
+        "a".to_string(),
+        "Fibonacci".to_string(),
+        "heap".to_string(),
+    ]);
+    let mut fh: FibonacciHeap<String> = FibonacciHeap::from_meld(fh1, fh2);
+    assert_eq!(fh.pop(), Some(",".to_string()));
+    assert_eq!(fh.pop(), Some("Fibonacci".to_string()));
+    assert_eq!(fh.pop(), Some("Hello".to_string()));
+    assert_eq!(fh.pop(), Some("This".to_string()));
+    assert_eq!(fh.pop(), Some("World".to_string()));
+    assert_eq!(fh.pop(), Some("a".to_string()));
+    assert_eq!(fh.pop(), Some("heap".to_string()));
+    assert_eq!(fh.pop(), Some("is".to_string()));
+    assert_eq!(fh.pop(), Some("make".to_string()));
+    assert_eq!(fh.pop(), Some("melding".to_string()));
+    assert_eq!(fh.pop(), Some("sure".to_string()));
+    assert_eq!(fh.pop(), Some("test".to_string()));
+    assert_eq!(fh.pop(), Some("that".to_string()));
+    assert_eq!(fh.pop(), Some("the".to_string()));
+    assert_eq!(fh.pop(), Some("to".to_string()));
+    assert_eq!(fh.pop(), Some("works".to_string()));
+    assert_eq!(fh.pop(), None);
+}
+
+#[test]
+fn test_from_vec() {
+    let fh1: FibonacciHeap<String> = FibonacciHeap::from(vec![
+        "Hello".to_string(),
+        "test".to_string(),
+        "to".to_string(),
+        "make".to_string(),
+        "sure".to_string(),
+        "that".to_string(),
+        "melding".to_string(),
+        "works".to_string(),
+        "the".to_string(),
+    ]);
+    let fh2: FibonacciHeap<String> = FibonacciHeap::from(vec![
+        "World".to_string(),
+        ",".to_string(),
+        "This".to_string(),
+        "is".to_string(),
+        "a".to_string(),
+        "Fibonacci".to_string(),
+        "heap".to_string(),
+    ]);
+    let mut fh: FibonacciHeap<String> = FibonacciHeap::from_meld(fh1, fh2);
+    assert_eq!(fh.pop(), Some(",".to_string()));
+    assert_eq!(fh.pop(), Some("Fibonacci".to_string()));
+    assert_eq!(fh.pop(), Some("Hello".to_string()));
+    assert_eq!(fh.pop(), Some("This".to_string()));
+    assert_eq!(fh.pop(), Some("World".to_string()));
+    assert_eq!(fh.pop(), Some("a".to_string()));
+    assert_eq!(fh.pop(), Some("heap".to_string()));
+    assert_eq!(fh.pop(), Some("is".to_string()));
+    assert_eq!(fh.pop(), Some("make".to_string()));
+    assert_eq!(fh.pop(), Some("melding".to_string()));
+    assert_eq!(fh.pop(), Some("sure".to_string()));
+    assert_eq!(fh.pop(), Some("test".to_string()));
+    assert_eq!(fh.pop(), Some("that".to_string()));
+    assert_eq!(fh.pop(), Some("the".to_string()));
+    assert_eq!(fh.pop(), Some("to".to_string()));
+    assert_eq!(fh.pop(), Some("works".to_string()));
+    assert_eq!(fh.pop(), None);
+}
