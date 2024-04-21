@@ -1,6 +1,11 @@
 use crate::FibonacciHeap;
 
 #[test]
+fn fails() {
+    assert!(false);
+}
+
+#[test]
 fn test_new() {
     let _: FibonacciHeap<String> = FibonacciHeap::new();
     let _: FibonacciHeap<i64> = FibonacciHeap::new();
