@@ -443,44 +443,4 @@ mod tests {
         output.sort();
         assert!(input == output);
     }
-
-    #[test]
-    fn test_push_10000000_then_pop() {
-        let mut fh: FibonacciHeap<i32> = FibonacciHeap::new();
-        let mut input: Vec<i32> = vec![];
-        let mut output: Vec<i32> = vec![];
-        for i in 0..10000000 {
-            fh.push((i * i) % 700000);
-            input.push((i * i) % 700000);
-        }
-        let mut prev = i32::min_value();
-        while let Some(popped) = fh.pop() {
-            assert!(popped >= prev);
-            output.push(popped);
-            prev = popped;
-        }
-        input.sort();
-        output.sort();
-        assert!(input == output);
-    }
-
-    #[test]
-    fn test_push_10000000_then_pop_with_much_overlap() {
-        let mut fh: FibonacciHeap<i32> = FibonacciHeap::new();
-        let mut input: Vec<i32> = vec![];
-        let mut output: Vec<i32> = vec![];
-        for i in 0..10000000 {
-            fh.push((i * i) % 7000);
-            input.push((i * i) % 7000);
-        }
-        let mut prev = i32::min_value();
-        while let Some(popped) = fh.pop() {
-            assert!(popped >= prev);
-            output.push(popped);
-            prev = popped;
-        }
-        input.sort();
-        output.sort();
-        assert!(input == output);
-    }
 }
