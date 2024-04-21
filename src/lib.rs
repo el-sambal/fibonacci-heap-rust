@@ -42,11 +42,25 @@ impl<T: Ord> FibonacciHeap<T> {
 
     /// Checks whether the Fibonacci heap is empty.
     pub fn is_empty(&self) -> bool {
-        !self.min.is_null()
+        self.min.is_null()
     }
 
     /// Produce a Fibonacci heap from melding two existing Fibonacci heaps. The two inputs are
     /// consumed.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use fibonacci_heap_rust::FibonacciHeap;
+    /// let mut fh1: FibonacciHeap<String> = FibonacciHeap::new();
+    /// let mut fh2: FibonacciHeap<String> = FibonacciHeap::new();
+    /// fh1.push("Hello".to_string());
+    /// fh2.push("World".to_string());
+    /// let mut fh: FibonacciHeap<String> = FibonacciHeap::from_meld(fh1,fh2);
+    /// assert_eq!(fh.pop(), Some("Hello".to_string()));
+    /// assert_eq!(fh.pop(), Some("World".to_string()));
+    /// assert_eq!(fh.pop(), None);
+    /// ```
     pub fn from_meld(heap1: FibonacciHeap<T>, heap2: FibonacciHeap<T>) -> FibonacciHeap<T> {
         let mut heap = FibonacciHeap::<T>::new();
         if heap1.is_empty() {

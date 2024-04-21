@@ -310,3 +310,15 @@ fn test_heap_meld_1() {
     assert_eq!(fh.pop(), Some("a".to_string()));
     assert_eq!(fh.pop(), Some("is".to_string()));
 }
+
+#[test]
+fn test_heap_meld_2() {
+    let mut fh1: FibonacciHeap<String> = FibonacciHeap::new();
+    let mut fh2: FibonacciHeap<String> = FibonacciHeap::new();
+    fh1.push("Aloha".to_string());
+    fh2.push("Mundo".to_string());
+    let mut fh: FibonacciHeap<String> = FibonacciHeap::from_meld(fh1,fh2);
+    assert_eq!(fh.pop(), Some("Aloha".to_string()));
+    assert_eq!(fh.pop(), Some("Mundo".to_string()));
+    assert_eq!(fh.pop(), None);
+}
