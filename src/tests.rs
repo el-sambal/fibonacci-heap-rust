@@ -280,3 +280,33 @@ fn test_push_heap_allocated_obj_for_drop_5() {
     assert_eq!(fh.pop(), Some("World".to_string()));
     assert_eq!(fh.pop(), Some("a".to_string()));
 }
+
+#[test]
+fn test_heap_meld_1() {
+    let mut fh1: FibonacciHeap<String> = FibonacciHeap::new();
+    let mut fh2: FibonacciHeap<String> = FibonacciHeap::new();
+    fh1.push("Hello".to_string());
+    fh2.push("World".to_string());
+    fh2.push(",".to_string());
+    fh2.push("This".to_string());
+    fh2.push("is".to_string());
+    fh2.push("a".to_string());
+    fh1.push("test".to_string());
+    fh1.push("to".to_string());
+    fh1.push("make".to_string());
+    fh1.push("sure".to_string());
+    fh1.push("that".to_string());
+    fh1.push("melding".to_string());
+    fh1.push("the".to_string());
+    fh2.push("Fibonacci".to_string());
+    fh2.push("heap".to_string());
+    fh1.push("works".to_string());
+    let mut fh: FibonacciHeap<String> = FibonacciHeap::from_meld(fh1,fh2);
+    assert_eq!(fh.pop(), Some(",".to_string()));
+    assert_eq!(fh.pop(), Some("Fibonacci".to_string()));
+    assert_eq!(fh.pop(), Some("Hello".to_string()));
+    assert_eq!(fh.pop(), Some("This".to_string()));
+    assert_eq!(fh.pop(), Some("World".to_string()));
+    assert_eq!(fh.pop(), Some("a".to_string()));
+    assert_eq!(fh.pop(), Some("is".to_string()));
+}
