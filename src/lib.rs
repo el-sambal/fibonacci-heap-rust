@@ -1,3 +1,5 @@
+use std::{cell::RefCell, rc::Rc};
+
 /// This is a min-Fibonacci heap.
 pub struct FibonacciHeap<T> {
     /// The current number of nodes in the Fibonacci heap.
@@ -7,7 +9,16 @@ pub struct FibonacciHeap<T> {
     min: *mut Node<T>,
 }
 
-pub struct Node<T> {
+pub struct NodePtr<T>(Rc<RefCell<NodePtrInternal<T>>>);
+
+struct NodePtrInternal<T> {
+    invalidated: bool,
+    ptr: *mut Node<T>,
+}
+
+/// A node in the Fibonacci heap, containing the key, some pointers to other nodes and some
+/// additional information.
+struct Node<T> {
     /// The key of the node.
     key: T,
     /// The left neighbor of this node in the circular doubly linked list.
@@ -29,6 +40,17 @@ pub struct Node<T> {
     /// A boolean flag which is true if and only if this node has lost a child node since the last time
     /// it was made the child of another node.
     mark: bool,
+    outside_ref: Rc<RefCell<NodePtrInternal<T>>>,
+}
+
+impl<T> NodePtr<T> {
+    pub fn delete(self) {
+        println!(
+            "todo: implement this! ptr: {:?} invalidated: {:?}",
+            self.0.borrow().ptr,
+            self.0.borrow().invalidated
+        );
+    }
 }
 
 impl<T: Ord> FibonacciHeap<T> {
@@ -171,7 +193,7 @@ impl<T: Ord> FibonacciHeap<T> {
     /// heap.push(2);
     /// assert!(heap.len() == 3);
     /// ```
-    pub fn push(&mut self, item: T) -> *mut Node<T> {
+    pub fn push(&mut self, item: T) -> NodePtr<T> {
         let node: *mut Node<T> = Box::into_raw(Box::new(Node {
             key: item,
             left: std::ptr::null_mut(),
@@ -180,9 +202,14 @@ impl<T: Ord> FibonacciHeap<T> {
             child: std::ptr::null_mut(),
             degree: 0,
             mark: false,
+            outside_ref: Rc::new(RefCell::new(NodePtrInternal {
+                ptr: std::ptr::null_mut(),
+                invalidated: false,
+            })),
         }));
         unsafe {
             // my first `unsafe` ever! :) 20 april 2024
+            (*node).outside_ref.borrow_mut().ptr = node;
             if self.min.is_null() {
                 (*node).left = node;
                 (*node).right = node;
@@ -194,9 +221,9 @@ impl<T: Ord> FibonacciHeap<T> {
                     self.min = node;
                 }
             }
+            self.n += 1;
+            NodePtr((*node).outside_ref.clone())
         }
-        self.n += 1;
-        node
     }
 
     /// Extracts the minimum element from the Fibonacci heap and returns it.
