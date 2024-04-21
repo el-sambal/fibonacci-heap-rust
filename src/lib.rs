@@ -377,5 +377,12 @@ impl<T: Ord> From<FibonacciHeap<T>> for Vec<T> {
     }
 }
 
+impl<T: Ord> Default for FibonacciHeap<T> {
+    /// Creates an empty `FibonacciHeap<T>`.
+    fn default() -> FibonacciHeap<T> {
+        FibonacciHeap::new()
+    }
+}
+
 #[cfg(test)]
 mod tests;

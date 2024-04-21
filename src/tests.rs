@@ -459,3 +459,8 @@ fn test_from_to_vec() {
     ];
     assert_eq!(fh, should_be);
 }
+#[test]
+fn test_default() {
+    let fh1: FibonacciHeap<String> = Default::default();
+    assert!(fh1.is_empty());
+}
