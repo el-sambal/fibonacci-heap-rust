@@ -195,11 +195,12 @@ impl<T: Ord> FibonacciHeap<T> {
 impl<T> Drop for FibonacciHeap<T> {
     fn drop(&mut self) {
         unsafe fn drop_recursive<T>(mut elem: *mut Node<T>) {
+            if elem.is_null() {
+                return;
+            }
             (*(*elem).left).right = std::ptr::null_mut();
             loop {
-                if !(*elem).child.is_null() {
-                    drop_recursive((*elem).child);
-                }
+                drop_recursive((*elem).child);
                 if (*elem).right.is_null() {
                     let _ = Box::from_raw(elem);
                     break;
