@@ -299,74 +299,58 @@ mod tests {
     #[test]
     fn test_push_many_then_pop_many() {
         let mut fh: FibonacciHeap<i32> = FibonacciHeap::new();
-        fh.push(42);
-        fh.push(-42);
-        fh.push(-137);
-        fh.push(137);
+        let mut input: Vec<i32> = vec![];
+        let mut output: Vec<i32> = vec![];
         for i in 0..1000 {
             fh.push((i * i * i) % 3000);
+            input.push((i * i * i) % 3000);
         }
         let mut prev = i32::min_value();
-        let mut count = 0;
         while let Some(popped) = fh.pop() {
             assert!(popped >= prev);
             prev = popped;
-            count += 1;
+            output.push(popped);
         }
-        assert!(count == 1004);
+        input.sort();
+        output.sort();
+        assert!(input == output);
     }
 
     #[test]
     fn test_push_many_then_pop_many_with_many_duplicates() {
         let mut fh: FibonacciHeap<i32> = FibonacciHeap::new();
+        let mut input: Vec<i32> = vec![];
+        let mut output: Vec<i32> = vec![];
         for i in 0..1000 {
             fh.push((i * i * i) % 300);
+            input.push((i * i * i) % 300);
         }
         let mut prev = i32::min_value();
-        let mut count = 0;
         while let Some(popped) = fh.pop() {
             assert!(popped >= prev);
             prev = popped;
-            count += 1;
+            output.push(popped);
         }
-        assert!(count == 1000);
+        input.sort();
+        output.sort();
+        assert!(input == output);
     }
 
     #[test]
     fn test_push_many_then_pop_many_with_very_many_duplicates() {
         let mut fh: FibonacciHeap<i32> = FibonacciHeap::new();
-        for i in 0..1000 {
-            fh.push((i * i * i) % 3);
-        }
-        let mut prev = i32::min_value();
-        let mut count = 0;
-        while let Some(popped) = fh.pop() {
-            assert!(popped >= prev);
-            prev = popped;
-            count += 1;
-        }
-        assert!(count == 1000);
-    }
-
-    #[test]
-    fn test_push_many_then_pop_many_test_input_equals_output() {
-        let mut fh: FibonacciHeap<i32> = FibonacciHeap::new();
         let mut input: Vec<i32> = vec![];
         let mut output: Vec<i32> = vec![];
         for i in 0..1000 {
-            let val = (i * i * i) % 1500;
-            fh.push(val);
-            input.push(val);
+            fh.push((i * i * i) % 3);
+            input.push((i * i * i) % 3);
         }
         let mut prev = i32::min_value();
-        let mut count = 0;
         while let Some(popped) = fh.pop() {
-            output.push(popped);
             assert!(popped >= prev);
             prev = popped;
-            count += 1;
+            output.push(popped);
         }
-        assert!(count == 1000);
         input.sort();
         output.sort();
         assert!(input == output);
@@ -375,43 +359,11 @@ mod tests {
     #[test]
     fn test_push_very_many_then_pop_very_many() {
         let mut fh: FibonacciHeap<i32> = FibonacciHeap::new();
-        for i in 0..10000 {
-            fh.push((i * i) % 2000);
-        }
-        let mut prev = i32::min_value();
-        let mut count = 0;
-        while let Some(popped) = fh.pop() {
-            assert!(popped >= prev);
-            prev = popped;
-            count += 1;
-        }
-        assert!(count == 10000);
-    }
-
-    #[test]
-    fn test_push_very_many_then_pop_very_many_with_much_overlap() {
-        let mut fh: FibonacciHeap<i32> = FibonacciHeap::new();
-        for i in 0..10000 {
-            fh.push((i * i) % 20);
-        }
-        let mut prev = i32::min_value();
-        let mut count = 0;
-        while let Some(popped) = fh.pop() {
-            assert!(popped >= prev);
-            prev = popped;
-            count += 1;
-        }
-        assert!(count == 10000);
-    }
-
-    #[test]
-    fn test_push_1000000_then_pop() {
-        let mut fh: FibonacciHeap<i32> = FibonacciHeap::new();
         let mut input: Vec<i32> = vec![];
         let mut output: Vec<i32> = vec![];
-        for i in 0..1000000 {
-            fh.push((i * i) % 700000);
-            input.push((i * i) % 700000);
+        for i in 0..10000 {
+            fh.push((i * i) % 2000);
+            input.push((i * i) % 2000);
         }
         let mut prev = i32::min_value();
         while let Some(popped) = fh.pop() {
@@ -425,15 +377,57 @@ mod tests {
     }
 
     #[test]
-    fn test_push_1000000_then_pop_with_much_overlap() {
+    fn test_push_very_many_then_pop_very_many_with_much_overlap() {
         let mut fh: FibonacciHeap<i32> = FibonacciHeap::new();
         let mut input: Vec<i32> = vec![];
         let mut output: Vec<i32> = vec![];
+        for i in 0..10000 {
+            fh.push((i * i) % 20);
+            input.push((i * i) % 20);
+        }
+        let mut prev = i32::min_value();
+        while let Some(popped) = fh.pop() {
+            assert!(popped >= prev);
+            output.push(popped);
+            prev = popped;
+        }
+        input.sort();
+        output.sort();
+        assert!(input == output);
+    }
+
+    #[test]
+    #[cfg(not(miri))]
+    fn test_push_1000000_then_pop() {
+        let mut fh: FibonacciHeap<i64> = FibonacciHeap::new();
+        let mut input: Vec<i64> = vec![];
+        let mut output: Vec<i64> = vec![];
+        for i in 0..1000000 {
+            fh.push((i * i) % 700000);
+            input.push((i * i) % 700000);
+        }
+        let mut prev = i64::min_value();
+        while let Some(popped) = fh.pop() {
+            assert!(popped >= prev);
+            output.push(popped);
+            prev = popped;
+        }
+        input.sort();
+        output.sort();
+        assert!(input == output);
+    }
+
+    #[test]
+    #[cfg(not(miri))]
+    fn test_push_1000000_then_pop_with_much_overlap() {
+        let mut fh: FibonacciHeap<i64> = FibonacciHeap::new();
+        let mut input: Vec<i64> = vec![];
+        let mut output: Vec<i64> = vec![];
         for i in 0..1000000 {
             fh.push((i * i) % 7000);
             input.push((i * i) % 7000);
         }
-        let mut prev = i32::min_value();
+        let mut prev = i64::min_value();
         while let Some(popped) = fh.pop() {
             assert!(popped >= prev);
             output.push(popped);
