@@ -301,7 +301,7 @@ fn test_heap_meld_1() {
     fh2.push("Fibonacci".to_string());
     fh2.push("heap".to_string());
     fh1.push("works".to_string());
-    let mut fh: FibonacciHeap<String> = FibonacciHeap::from_meld(fh1,fh2);
+    let mut fh: FibonacciHeap<String> = FibonacciHeap::from_meld(fh1, fh2);
     assert_eq!(fh.pop(), Some(",".to_string()));
     assert_eq!(fh.pop(), Some("Fibonacci".to_string()));
     assert_eq!(fh.pop(), Some("Hello".to_string()));
@@ -309,6 +309,16 @@ fn test_heap_meld_1() {
     assert_eq!(fh.pop(), Some("World".to_string()));
     assert_eq!(fh.pop(), Some("a".to_string()));
     assert_eq!(fh.pop(), Some("heap".to_string()));
+    assert_eq!(fh.pop(), Some("is".to_string()));
+    assert_eq!(fh.pop(), Some("make".to_string()));
+    assert_eq!(fh.pop(), Some("melding".to_string()));
+    assert_eq!(fh.pop(), Some("sure".to_string()));
+    assert_eq!(fh.pop(), Some("test".to_string()));
+    assert_eq!(fh.pop(), Some("that".to_string()));
+    assert_eq!(fh.pop(), Some("the".to_string()));
+    assert_eq!(fh.pop(), Some("to".to_string()));
+    assert_eq!(fh.pop(), Some("works".to_string()));
+    assert_eq!(fh.pop(), None);
 }
 
 #[test]
@@ -317,7 +327,7 @@ fn test_heap_meld_2() {
     let mut fh2: FibonacciHeap<String> = FibonacciHeap::new();
     fh1.push("Aloha".to_string());
     fh2.push("Mundo".to_string());
-    let mut fh: FibonacciHeap<String> = FibonacciHeap::from_meld(fh1,fh2);
+    let mut fh: FibonacciHeap<String> = FibonacciHeap::from_meld(fh1, fh2);
     assert_eq!(fh.pop(), Some("Aloha".to_string()));
     assert_eq!(fh.pop(), Some("Mundo".to_string()));
     assert_eq!(fh.pop(), None);

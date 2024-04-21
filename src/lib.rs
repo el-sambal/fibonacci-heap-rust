@@ -33,6 +33,14 @@ pub struct Node<T> {
 
 impl<T: Ord> FibonacciHeap<T> {
     /// Construct a new, empty Fibonacci heap.
+    ///
+    /// Just like this:
+    ///
+    /// ```
+    /// use fibonacci_heap_rust::FibonacciHeap;
+    /// let mut heap: FibonacciHeap<String> = FibonacciHeap::new();
+    /// assert!(heap.is_empty());
+    /// ```
     pub const fn new() -> FibonacciHeap<T> {
         FibonacciHeap {
             n: 0,
@@ -41,8 +49,47 @@ impl<T: Ord> FibonacciHeap<T> {
     }
 
     /// Checks whether the Fibonacci heap is empty.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use fibonacci_heap_rust::FibonacciHeap;
+    /// let mut heap: FibonacciHeap<String> = FibonacciHeap::new();
+    /// assert!(heap.is_empty());
+    /// heap.push("Heap is not empty anymore!".to_string());
+    /// assert!(!heap.is_empty());
+    /// let _ = heap.pop();
+    /// assert!(heap.is_empty());
+    /// ```
     pub fn is_empty(&self) -> bool {
         self.min.is_null()
+    }
+
+    /// Returns the number of elements currently in the heap.
+    ///
+    /// An example:
+    ///
+    /// ```
+    /// use fibonacci_heap_rust::FibonacciHeap;
+    /// let mut heap: FibonacciHeap<u32> = FibonacciHeap::new();
+    /// assert!(heap.len() == 0);
+    /// heap.push(5);
+    /// assert!(heap.len() == 1);
+    /// heap.push(42);
+    /// assert!(heap.len() == 2);
+    /// heap.push(2);
+    /// assert!(heap.len() == 3);
+    /// let _ = heap.pop();
+    /// assert!(heap.len() == 2);
+    /// let _ = heap.pop();
+    /// assert!(heap.len() == 1);
+    /// let _ = heap.pop();
+    /// assert!(heap.len() == 0);
+    /// let _ = heap.pop();
+    /// assert!(heap.len() == 0);
+    /// ```
+    pub fn len(&self) -> usize {
+        self.n
     }
 
     /// Produce a Fibonacci heap from melding two existing Fibonacci heaps. The two inputs are
@@ -52,15 +99,37 @@ impl<T: Ord> FibonacciHeap<T> {
     ///
     /// ```
     /// use fibonacci_heap_rust::FibonacciHeap;
-    /// let mut fh1: FibonacciHeap<String> = FibonacciHeap::new();
-    /// let mut fh2: FibonacciHeap<String> = FibonacciHeap::new();
-    /// fh1.push("Hello".to_string());
-    /// fh2.push("World".to_string());
-    /// let mut fh: FibonacciHeap<String> = FibonacciHeap::from_meld(fh1,fh2);
-    /// assert_eq!(fh.pop(), Some("Hello".to_string()));
-    /// assert_eq!(fh.pop(), Some("World".to_string()));
-    /// assert_eq!(fh.pop(), None);
+    /// let mut heap1: FibonacciHeap<String> = FibonacciHeap::new();
+    /// let mut heap2: FibonacciHeap<String> = FibonacciHeap::new();
+    /// heap1.push("Hello".to_string());
+    /// heap2.push("World".to_string());
+    /// heap2.push("El-sambal".to_string());
+    /// let mut heap: FibonacciHeap<String> = FibonacciHeap::from_meld(heap1,heap2);
+    /// assert_eq!(heap.pop(), Some("El-sambal".to_string()));
+    /// assert_eq!(heap.pop(), Some("Hello".to_string()));
+    /// assert_eq!(heap.pop(), Some("World".to_string()));
+    /// assert_eq!(heap.pop(), None);
     /// ```
+    ///
+    /// You can also meld empty heaps:
+    ///
+    /// ```
+    /// use fibonacci_heap_rust::FibonacciHeap;
+    /// let mut heap1: FibonacciHeap<String> = FibonacciHeap::new();
+    /// let mut heap2: FibonacciHeap<String> = FibonacciHeap::new();
+    /// heap1.push("Hello".to_string());
+    /// heap1.push("World".to_string());
+    /// // heap2 is empty
+    /// let mut heap3: FibonacciHeap<String> = FibonacciHeap::from_meld(heap1,heap2);
+    /// assert_eq!(heap3.pop(), Some("Hello".to_string()));
+    /// assert_eq!(heap3.pop(), Some("World".to_string()));
+    /// assert_eq!(heap3.pop(), None);
+    /// let mut heap4: FibonacciHeap<String> = FibonacciHeap::new();
+    /// // heap3 and heap4 are both empty
+    /// let mut heap5: FibonacciHeap<String> = FibonacciHeap::from_meld(heap3, heap4);
+    /// assert!(heap5.is_empty());
+    /// ```
+    ///
     pub fn from_meld(heap1: FibonacciHeap<T>, heap2: FibonacciHeap<T>) -> FibonacciHeap<T> {
         let mut heap = FibonacciHeap::<T>::new();
         if heap1.is_empty() {
@@ -88,6 +157,20 @@ impl<T: Ord> FibonacciHeap<T> {
     /// A raw pointer to the node containing the inserted element is returned. You can pass this
     /// pointer into the `decrease_key` and `delete` methods. If you are not going to use these
     /// methods on the inserted element, you can discard the pointer outputted by this method.
+    ///
+    /// Just like this:
+    ///
+    /// ```
+    /// use fibonacci_heap_rust::FibonacciHeap;
+    /// let mut heap: FibonacciHeap<u32> = FibonacciHeap::new();
+    /// assert!(heap.len() == 0);
+    /// heap.push(5);
+    /// assert!(heap.len() == 1);
+    /// heap.push(42);
+    /// assert!(heap.len() == 2);
+    /// heap.push(2);
+    /// assert!(heap.len() == 3);
+    /// ```
     pub fn push(&mut self, item: T) -> *mut Node<T> {
         let node: *mut Node<T> = Box::into_raw(Box::new(Node {
             key: item,
