@@ -78,6 +78,8 @@ impl<T: Ord> FibonacciHeap<T> {
             };
         }
         heap.n = heap1.n + heap2.n;
+        std::mem::forget(heap1);
+        std::mem::forget(heap2);
         heap
     }
 

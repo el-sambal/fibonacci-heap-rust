@@ -308,7 +308,7 @@ fn test_heap_meld_1() {
     assert_eq!(fh.pop(), Some("This".to_string()));
     assert_eq!(fh.pop(), Some("World".to_string()));
     assert_eq!(fh.pop(), Some("a".to_string()));
-    assert_eq!(fh.pop(), Some("is".to_string()));
+    assert_eq!(fh.pop(), Some("heap".to_string()));
 }
 
 #[test]
