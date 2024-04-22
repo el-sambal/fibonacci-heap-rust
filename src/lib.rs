@@ -9,10 +9,25 @@ pub struct FibonacciHeap<T> {
     min: *mut Node<T>,
 }
 
+/// A smart pointer that points to an element inside the Fibonacci heap.
+///
+/// When you push an element to the Fibonacci heap, a smart pointer of this type will be returned.
+/// It allows you to keep a reference (pointer) to an element that lives within the Fibonacci heap.
+/// You can use this pointer if you want to delete it from the Fibonacci heap, or decrease its key.
+///
+/// This smart pointer keeps track of whether it has been invalidated or not, so you can freely
+/// try to delete an element even if it does not exist in the Fibonacci heap anymore (this will do
+/// nothing, but it won't crash). You can also clone the smart pointer.
 pub struct NodePtr<T>(Rc<RefCell<NodePtrInternal<T>>>);
 
+/// A custom smart pointer to point to an element inside the Fibonacci heap from outside.
 struct NodePtrInternal<T> {
+    /// Whether this pointer is invalidated or not.
+    ///
+    /// The pointer gets invalidated if the node it points to, gets deleted from the Fibonacci
+    /// heap, or if the entire Fibonacci heap gets dropped.
     invalidated: bool,
+    /// A raw pointer to the [Node].
     ptr: *mut Node<T>,
 }
 
@@ -40,6 +55,16 @@ struct Node<T> {
     /// A boolean flag which is true if and only if this node has lost a child node since the last time
     /// it was made the child of another node.
     mark: bool,
+    /// A reference to this node from 'the outside'.
+    ///
+    /// Basically, if you push an element onto the
+    /// Fibonacci heap, you might want to delete (or decrease_key) it later. When the user pushes,
+    /// they get a custom smart pointer back, which points to the element they just pushed.
+    /// This returned pointer is 'smart' in the sense that it
+    /// keeps track of whether it has been invalidated or not. So, when the Fibheap is dropped or
+    /// when the node is popped, we need to invalidate that smart pointer. But in order to
+    /// invalidate the smart pointer, we need to find it first! So, this struct field is a smart pointer (Rc) to
+    /// the smart pointer which points to this node.
     outside_ref: Rc<RefCell<NodePtrInternal<T>>>,
 }
 
@@ -231,6 +256,7 @@ impl<T: Ord> FibonacciHeap<T> {
         let popped = self.min;
         if !popped.is_null() {
             unsafe {
+                (*popped).outside_ref.borrow_mut().invalidated = true;
                 let mut child = (*popped).child;
                 if !child.is_null() {
                     while !(*child).parent.is_null() {
@@ -360,6 +386,7 @@ impl<T> Drop for FibonacciHeap<T> {
                     let _ = Box::from_raw(elem);
                     break;
                 }
+                (*elem).outside_ref.borrow_mut().invalidated = true;
                 elem = (*elem).right;
                 let _ = Box::from_raw((*elem).left);
             }
