@@ -131,6 +131,7 @@ fn test_push_many_then_pop_many_with_very_many_duplicates() {
 }
 
 #[test]
+#[cfg(not(miri))]
 fn test_push_very_many_then_pop_very_many() {
     let mut fh: FibonacciHeap<i32> = FibonacciHeap::new();
     let mut input: Vec<i32> = vec![];
@@ -151,6 +152,7 @@ fn test_push_very_many_then_pop_very_many() {
 }
 
 #[test]
+#[cfg(not(miri))]
 fn test_push_very_many_then_pop_very_many_with_much_overlap() {
     let mut fh: FibonacciHeap<i32> = FibonacciHeap::new();
     let mut input: Vec<i32> = vec![];
