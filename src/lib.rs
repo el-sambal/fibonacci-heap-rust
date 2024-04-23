@@ -29,6 +29,8 @@ struct NodePtrInternal<T> {
     invalidated: bool,
     /// A raw pointer to the [Node].
     ptr: *mut Node<T>,
+    /// A raw pointer to the [FibonacciHeap] which this node is/was in.
+    heap_ptr: *const FibonacciHeap<T>,
 }
 
 /// A node in the Fibonacci heap, containing the key, some pointers to other nodes and some
@@ -229,6 +231,7 @@ impl<T: Ord> FibonacciHeap<T> {
             mark: false,
             outside_ref: Rc::new(RefCell::new(NodePtrInternal {
                 ptr: std::ptr::null_mut(),
+                heap_ptr: std::ptr::addr_of!(*self),
                 invalidated: false,
             })),
         }));
@@ -284,14 +287,19 @@ impl<T: Ord> FibonacciHeap<T> {
     /// does not exist in the heap anymore, or if the entire heap is already dropped, nothing will
     /// happen. If you try to increase the key instead of decreasing it, nothing will happen.
     ///
-    /// If you call this function on some heap H and node x, in such a way that x is/was never an element of
-    /// H but of some other heap instead, UNDEFINED BEHAVIOR. TODO: fix this.
+    /// If you call this function on some heap `H` and element `x`, in such a way that `x` is/was never an element of
+    /// `H` but of some other heap instead, nothing happens.
     pub fn decrease_key(&mut self, elem: NodePtr<T>, new_key: T) {
         if elem.0.borrow().invalidated {
             return;
         }
         if &new_key > unsafe { &(*elem.0.borrow().ptr).key } {
             // can only decrease key, not increase
+            return;
+        }
+        if !std::ptr::eq(elem.0.borrow().heap_ptr, std::ptr::addr_of!(*self)) {
+            // called this function on the wrong element/heap
+            // (this element was never part of this heap)
             return;
         }
         unsafe {
