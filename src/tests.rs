@@ -466,3 +466,68 @@ fn test_default() {
     let fh1: FibonacciHeap<String> = Default::default();
     assert!(fh1.is_empty());
 }
+
+#[test]
+fn test_decrease_key_1() {
+    let mut fh: FibonacciHeap<String> = FibonacciHeap::new();
+    fh.push("a1".to_string());
+    fh.push("a2".to_string());
+    fh.push("a3".to_string());
+    let a4_ptr = fh.push("a4".to_string());
+    fh.push("a5".to_string());
+    fh.push("a6".to_string());
+    fh.push("a7".to_string());
+    assert_eq!(fh.pop(), Some("a1".to_string()));
+    assert_eq!(fh.pop(), Some("a2".to_string()));
+    fh.decrease_key(a4_ptr, "a0".to_string());
+    assert_eq!(fh.pop(), Some("a0".to_string()));
+    assert_eq!(fh.pop(), Some("a3".to_string()));
+    assert_eq!(fh.pop(), Some("a5".to_string()));
+    assert_eq!(fh.pop(), Some("a6".to_string()));
+    assert_eq!(fh.pop(), Some("a7".to_string()));
+    assert_eq!(fh.pop(), None);
+}
+
+#[test]
+fn test_decrease_key_2() {
+    let mut fh: FibonacciHeap<String> = FibonacciHeap::new();
+    fh.push("a1".to_string());
+    fh.push("a2".to_string());
+    fh.push("a3".to_string());
+    let a4_ptr = fh.push("a4".to_string());
+    fh.push("a5".to_string());
+    fh.push("a6".to_string());
+    fh.push("a7".to_string());
+    assert_eq!(fh.pop(), Some("a1".to_string()));
+    assert_eq!(fh.pop(), Some("a2".to_string()));
+    fh.decrease_key(a4_ptr, "a8".to_string()); // new key > old key: nothing happens
+    assert_eq!(fh.pop(), Some("a3".to_string()));
+    assert_eq!(fh.pop(), Some("a4".to_string()));
+    assert_eq!(fh.pop(), Some("a5".to_string()));
+    assert_eq!(fh.pop(), Some("a6".to_string()));
+    assert_eq!(fh.pop(), Some("a7".to_string()));
+    assert_eq!(fh.pop(), None);
+}
+
+#[test]
+fn test_decrease_key_3() {
+    let mut fh: FibonacciHeap<String> = FibonacciHeap::new();
+    let mut fh_wrong: FibonacciHeap<String> = FibonacciHeap::new();
+    fh.push("a1".to_string());
+    fh.push("a2".to_string());
+    fh.push("a3".to_string());
+    let a4_ptr = fh.push("a4".to_string());
+    fh.push("a5".to_string());
+    fh.push("a6".to_string());
+    fh.push("a7".to_string());
+    assert_eq!(fh.pop(), Some("a1".to_string()));
+    assert_eq!(fh.pop(), Some("a2".to_string()));
+    fh_wrong.decrease_key(a4_ptr, "a0".to_string()); // wrong heap: nothing happens
+    assert_eq!(fh.pop(), Some("a3".to_string()));
+    assert_eq!(fh.pop(), Some("a4".to_string()));
+    assert_eq!(fh.pop(), Some("a5".to_string()));
+    assert_eq!(fh.pop(), Some("a6".to_string()));
+    assert_eq!(fh.pop(), Some("a7".to_string()));
+    assert_eq!(fh.pop(), None);
+    assert_eq!(fh_wrong.pop(), None);
+}

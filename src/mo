@@ -1,0 +1,21 @@
+Preparing a sysroot for Miri (target: x86_64-unknown-linux-gnu)... done
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.00s
+     Running unittests src/lib.rs (/home/aron/Documents/Programmeer/fibonacci-heap-rust/target/miri/x86_64-unknown-linux-gnu/debug/deps/fibonacci_heap_rust-85bd2f84251b07d4)
+
+running 21 tests
+test tests::test_default ... ok
+test tests::test_from_array ... ok
+test tests::test_from_to_vec ... ok
+test tests::test_from_vec ... ok
+test tests::test_heap_meld_1 ... ok
+test tests::test_heap_meld_2 ... ok
+test tests::test_new ... ok
+test tests::test_push_and_pop_one_element ... ok
+test tests::test_push_and_pop_three_elements_1 ... ok
+test tests::test_push_and_pop_three_elements_2 ... ok
+test tests::test_push_and_pop_three_elements_3 ... ok
+test tests::test_push_and_pop_two_elements_1 ... ok
+test tests::test_push_and_pop_two_elements_2 ... ok
+test tests::test_push_heap_allocated_obj_for_drop_1 ... ok
+test tests::test_push_heap_allocated_obj_for_drop_2 ... ok
+test tests::test_push_heap_allocated_obj_for_drop_3 ... ok
