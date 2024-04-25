@@ -283,13 +283,37 @@ impl<T: Ord> FibonacciHeap<T> {
         }
     }
 
-    /// Deletes the element pointed to by `elem` from the Fibonacci heap it is in. If this element
+    /// Decreases the key of the element pointed to by `elem` from the Fibonacci heap it is in. If this element
     /// does not exist in the heap anymore, or if the entire heap is already dropped, nothing will
     /// happen. If you try to increase the key instead of decreasing it, nothing will happen.
     ///
     /// If you call this function on some heap `H` and element `x`, in such a way that `x` is/was never an element of
     /// `H` but of some other heap instead, nothing happens.
     pub fn decrease_key(&mut self, elem: &NodePtr<T>, new_key: T) {
+        unsafe fn cut<T: Ord>(
+            heap: &mut FibonacciHeap<T>,
+            node: *mut Node<T>,
+            parent: *mut Node<T>,
+        ) {
+            (*parent).degree -= 1;
+            FibonacciHeap::remove_from_circular_list(node);
+            FibonacciHeap::add_node_to_nonempty_circular_list(node, heap.min);
+            (*node).parent = std::ptr::null_mut();
+            (*node).mark = false;
+        }
+
+        unsafe fn cascading_cut<T: Ord>(heap: &mut FibonacciHeap<T>, node: *mut Node<T>) {
+            let parent = (*node).parent;
+            if !parent.is_null() {
+                if !(*node).mark {
+                    (*node).mark = true;
+                } else {
+                    cut(heap, node, parent);
+                    cascading_cut(heap, parent);
+                }
+            }
+        }
+
         if elem.0.borrow().invalidated {
             return;
         }
@@ -307,8 +331,8 @@ impl<T: Ord> FibonacciHeap<T> {
             (*node).key = new_key;
             let parent = (*node).parent;
             if !parent.is_null() && (*node).key < (*parent).key {
-                self.cut(node, parent);
-                self.cascading_cut(parent);
+                cut(self, node, parent);
+                cascading_cut(self, parent);
             }
             if (*node).key < (*self.min).key {
                 (self.min) = node;
@@ -316,24 +340,56 @@ impl<T: Ord> FibonacciHeap<T> {
         }
     }
 
-    unsafe fn cut(&mut self, node: *mut Node<T>, parent: *mut Node<T>) {
-        (*parent).degree -= 1;
-        Self::remove_from_circular_list(node);
-        Self::add_node_to_nonempty_circular_list(node, self.min);
-        (*node).parent = std::ptr::null_mut();
-        (*node).mark = false;
-    }
+    /// Deletes the element pointed to by `elem` from the Fibonacci heap it is in. If this element
+    /// does not exist in the heap anymore, or if the entire heap is already dropped, nothing will
+    /// happen. If you try to increase the key instead of decreasing it, nothing will happen.
+    ///
+    /// If you call this function on some heap `H` and element `x`, in such a way that `x` is/was never an element of
+    /// `H` but of some other heap instead, nothing happens.
+    pub fn delete(&mut self, elem: NodePtr<T>) -> Option<T> {
+        unsafe fn cut<T: Ord>(
+            heap: &mut FibonacciHeap<T>,
+            node: *mut Node<T>,
+            parent: *mut Node<T>,
+        ) {
+            (*parent).degree -= 1;
+            FibonacciHeap::remove_from_circular_list(node);
+            FibonacciHeap::add_node_to_nonempty_circular_list(node, heap.min);
+            (*node).parent = std::ptr::null_mut();
+            (*node).mark = false;
+        }
 
-    unsafe fn cascading_cut(&mut self, node: *mut Node<T>) {
-        let parent = (*node).parent;
-        if !parent.is_null() {
-            if !(*node).mark {
-                (*node).mark = true;
-            } else {
-                self.cut(node, parent);
-                self.cascading_cut(parent);
+        unsafe fn cascading_cut<T: Ord>(heap: &mut FibonacciHeap<T>, node: *mut Node<T>) {
+            let parent = (*node).parent;
+            if !parent.is_null() {
+                if !(*node).mark {
+                    (*node).mark = true;
+                } else {
+                    cut(heap, node, parent);
+                    cascading_cut(heap, parent);
+                }
             }
         }
+
+        if elem.0.borrow().invalidated {
+            return None;
+        }
+        if !std::ptr::eq(elem.0.borrow().heap_ptr, std::ptr::addr_of!(*self)) {
+            // called this function on the wrong element/heap
+            // (this element was never part of this heap)
+            return None;
+        }
+        let node: *mut Node<T> = elem.0.borrow().ptr;
+        unsafe {
+            let parent = (*node).parent;
+            if !parent.is_null() {
+                cut(self, node, parent);
+                cascading_cut(self, parent);
+            }
+        }
+        self.min = node;
+
+        self.pop()
     }
 
     /// This method basically fixes up the Fibonacci heap (it is called by the `pop()` method) such
