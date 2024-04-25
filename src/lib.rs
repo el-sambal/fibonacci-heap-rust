@@ -289,7 +289,7 @@ impl<T: Ord> FibonacciHeap<T> {
     ///
     /// If you call this function on some heap `H` and element `x`, in such a way that `x` is/was never an element of
     /// `H` but of some other heap instead, nothing happens.
-    pub fn decrease_key(&mut self, elem: NodePtr<T>, new_key: T) {
+    pub fn decrease_key(&mut self, elem: &NodePtr<T>, new_key: T) {
         if elem.0.borrow().invalidated {
             return;
         }
