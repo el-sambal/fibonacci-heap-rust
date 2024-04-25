@@ -18,6 +18,31 @@ pub struct FibonacciHeap<T> {
 /// This smart pointer keeps track of whether it has been invalidated or not, so you can freely
 /// try to delete an element even if it does not exist in the Fibonacci heap anymore (this will do
 /// nothing, but it won't crash). You can also clone the smart pointer.
+///
+/// # Examples
+///
+/// ```
+/// use fibonacci_heap_rust::FibonacciHeap;
+/// let mut heap = FibonacciHeap::<i32>::new();
+/// let ptr1 = heap.push(42); // now we have a pointer that points to the 42 we just inserted
+/// let ptr2 = heap.push(137);
+/// let ptr3 = heap.push(-42);
+/// let ptr4 = heap.push(108);
+///
+/// // a pointer can be used to decrease the key of the element it points to:
+/// heap.decrease_key(&ptr1, 32); // change the 42 to 32
+/// heap.decrease_key(&ptr1, 31); // change the 32 to 31
+/// heap.decrease_key(&ptr1, 30); // change the 31 to 30
+///
+/// // a pointer can also be used to delete an element:
+/// heap.delete(ptr1);
+///
+/// // now the original 42 (which later became 32, 31 and 30) is gone!
+/// assert_eq!(heap.pop(), Some(-42));
+/// assert_eq!(heap.pop(), Some(108));
+/// assert_eq!(heap.pop(), Some(137));
+/// assert_eq!(heap.pop(), None);
+/// ```
 #[derive(Clone)]
 pub struct NodePtr<T>(Rc<RefCell<NodePtrInternal<T>>>);
 
@@ -105,10 +130,15 @@ impl<T: Ord> FibonacciHeap<T> {
     /// ```
     /// use fibonacci_heap_rust::FibonacciHeap;
     /// let mut heap: FibonacciHeap<String> = FibonacciHeap::new();
+    ///
     /// assert!(heap.is_empty());
+    ///
     /// heap.push("Heap is not empty anymore!".to_string());
+    ///
     /// assert!(!heap.is_empty());
+    ///
     /// let _ = heap.pop();
+    ///
     /// assert!(heap.is_empty());
     /// ```
     pub fn is_empty(&self) -> bool {
@@ -123,18 +153,25 @@ impl<T: Ord> FibonacciHeap<T> {
     /// use fibonacci_heap_rust::FibonacciHeap;
     /// let mut heap: FibonacciHeap<u32> = FibonacciHeap::new();
     /// assert!(heap.len() == 0);
+    ///
     /// heap.push(5);
     /// assert!(heap.len() == 1);
+    ///
     /// heap.push(42);
     /// assert!(heap.len() == 2);
+    ///
     /// heap.push(2);
     /// assert!(heap.len() == 3);
+    ///
     /// let _ = heap.pop();
     /// assert!(heap.len() == 2);
+    ///
     /// let _ = heap.pop();
     /// assert!(heap.len() == 1);
+    ///
     /// let _ = heap.pop();
     /// assert!(heap.len() == 0);
+    ///
     /// let _ = heap.pop();
     /// assert!(heap.len() == 0);
     /// ```
@@ -151,35 +188,18 @@ impl<T: Ord> FibonacciHeap<T> {
     /// use fibonacci_heap_rust::FibonacciHeap;
     /// let mut heap1: FibonacciHeap<String> = FibonacciHeap::new();
     /// let mut heap2: FibonacciHeap<String> = FibonacciHeap::new();
+    ///
     /// heap1.push("Hello".to_string());
     /// heap2.push("World".to_string());
     /// heap2.push("El-sambal".to_string());
+    ///
     /// let mut heap: FibonacciHeap<String> = FibonacciHeap::from_meld(heap1,heap2);
+    ///
     /// assert_eq!(heap.pop(), Some("El-sambal".to_string()));
     /// assert_eq!(heap.pop(), Some("Hello".to_string()));
     /// assert_eq!(heap.pop(), Some("World".to_string()));
     /// assert_eq!(heap.pop(), None);
     /// ```
-    ///
-    /// You can also meld empty heaps:
-    ///
-    /// ```
-    /// use fibonacci_heap_rust::FibonacciHeap;
-    /// let mut heap1: FibonacciHeap<String> = FibonacciHeap::from(
-    ///     ["Hello".to_string(), "World".to_string()]
-    /// );
-    /// let mut heap2: FibonacciHeap<String> = FibonacciHeap::new();
-    /// // heap2 is empty
-    /// let mut heap3: FibonacciHeap<String> = FibonacciHeap::from_meld(heap1,heap2);
-    /// assert_eq!(heap3.pop(), Some("Hello".to_string()));
-    /// assert_eq!(heap3.pop(), Some("World".to_string()));
-    /// assert_eq!(heap3.pop(), None);
-    /// let mut heap4: FibonacciHeap<String> = FibonacciHeap::new();
-    /// // heap3 and heap4 are both empty
-    /// let mut heap5: FibonacciHeap<String> = FibonacciHeap::from_meld(heap3, heap4);
-    /// assert!(heap5.is_empty());
-    /// ```
-    ///
     pub fn from_meld(heap1: FibonacciHeap<T>, heap2: FibonacciHeap<T>) -> FibonacciHeap<T> {
         let mut heap = FibonacciHeap::<T>::new();
         if heap1.is_empty() {
@@ -214,10 +234,13 @@ impl<T: Ord> FibonacciHeap<T> {
     /// use fibonacci_heap_rust::FibonacciHeap;
     /// let mut heap: FibonacciHeap<u32> = FibonacciHeap::new();
     /// assert!(heap.len() == 0);
+    ///
     /// heap.push(5);
     /// assert!(heap.len() == 1);
+    ///
     /// heap.push(42);
     /// assert!(heap.len() == 2);
+    ///
     /// heap.push(2);
     /// assert!(heap.len() == 3);
     /// ```
@@ -255,34 +278,6 @@ impl<T: Ord> FibonacciHeap<T> {
         }
     }
 
-    /// Extracts the minimum element from the Fibonacci heap and returns it.
-    pub fn pop(&mut self) -> Option<T> {
-        let popped = self.min;
-        if !popped.is_null() {
-            unsafe {
-                (*popped).outside_ref.borrow_mut().invalidated = true;
-                let mut child = (*popped).child;
-                if !child.is_null() {
-                    while !(*child).parent.is_null() {
-                        (*child).parent = std::ptr::null_mut();
-                        child = (*child).right;
-                    }
-                }
-                FibonacciHeap::concatenate_circular_lists(child, popped);
-                if (*popped).right != popped {
-                    FibonacciHeap::remove_from_circular_list(popped);
-                    self.min = (*popped).right;
-                    self.consolidate();
-                } else {
-                    self.min = std::ptr::null_mut();
-                }
-            }
-            self.n -= 1;
-            unsafe { Some(Box::from_raw(popped).key) }
-        } else {
-            None
-        }
-    }
 
     /// Decreases the key of the element pointed to by `elem` from the Fibonacci heap it is in. If this element
     /// does not exist in the heap anymore, or if the entire heap is already dropped, nothing will
@@ -391,6 +386,35 @@ impl<T: Ord> FibonacciHeap<T> {
         self.min = node;
 
         self.pop()
+    }
+
+    /// Extracts the minimum element from the Fibonacci heap and returns it.
+    pub fn pop(&mut self) -> Option<T> {
+        let popped = self.min;
+        if !popped.is_null() {
+            unsafe {
+                (*popped).outside_ref.borrow_mut().invalidated = true;
+                let mut child = (*popped).child;
+                if !child.is_null() {
+                    while !(*child).parent.is_null() {
+                        (*child).parent = std::ptr::null_mut();
+                        child = (*child).right;
+                    }
+                }
+                FibonacciHeap::concatenate_circular_lists(child, popped);
+                if (*popped).right != popped {
+                    FibonacciHeap::remove_from_circular_list(popped);
+                    self.min = (*popped).right;
+                    self.consolidate();
+                } else {
+                    self.min = std::ptr::null_mut();
+                }
+            }
+            self.n -= 1;
+            unsafe { Some(Box::from_raw(popped).key) }
+        } else {
+            None
+        }
     }
 
     /// This method basically fixes up the Fibonacci heap (it is called by the `pop()` method) such

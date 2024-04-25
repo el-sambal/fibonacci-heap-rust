@@ -674,24 +674,72 @@ fn test_delete_5() {
     assert_eq!(fh.pop(), Some("a2".to_string()));
     fh.delete(a4_ptr.clone()); // delete multiple times is OK
     fh.delete(a4_ptr.clone()); // (nothing happens after first time)
-    fh.delete(a4_ptr.clone()); 
-    fh.delete(a4_ptr.clone()); 
-    fh.delete(a4_ptr.clone()); 
-    fh.delete(a4_ptr.clone()); 
-    fh.delete(a4_ptr.clone()); 
-    fh.delete(a4_ptr.clone()); 
-    fh.delete(a4_ptr.clone()); 
-    fh.delete(a4_ptr.clone()); 
-    fh.delete(a4_ptr.clone()); 
-    fh.delete(a4_ptr.clone()); 
-    fh.delete(a4_ptr.clone()); 
-    fh.delete(a4_ptr.clone()); 
-    fh.delete(a4_ptr.clone()); 
-    fh.delete(a4_ptr.clone()); 
-    fh.delete(a4_ptr.clone()); 
+    fh.delete(a4_ptr.clone());
+    fh.delete(a4_ptr.clone());
+    fh.delete(a4_ptr.clone());
+    fh.delete(a4_ptr.clone());
+    fh.delete(a4_ptr.clone());
+    fh.delete(a4_ptr.clone());
+    fh.delete(a4_ptr.clone());
+    fh.delete(a4_ptr.clone());
+    fh.delete(a4_ptr.clone());
+    fh.delete(a4_ptr.clone());
+    fh.delete(a4_ptr.clone());
+    fh.delete(a4_ptr.clone());
+    fh.delete(a4_ptr.clone());
+    fh.delete(a4_ptr.clone());
+    fh.delete(a4_ptr.clone());
     assert_eq!(fh.pop(), Some("a3".to_string()));
     assert_eq!(fh.pop(), Some("a5".to_string()));
     assert_eq!(fh.pop(), Some("a6".to_string()));
     assert_eq!(fh.pop(), Some("a7".to_string()));
+    assert_eq!(fh.pop(), None);
+}
+
+#[test]
+fn test_delete_6() {
+    let mut fh: FibonacciHeap<String> = FibonacciHeap::new();
+    let ptr = fh.push("a1".to_string());
+    fh.delete(ptr.clone());
+    assert_eq!(fh.pop(), None);
+}
+
+#[test]
+fn test_delete_7() {
+    let mut fh: FibonacciHeap<String> = FibonacciHeap::new();
+    let ptr = fh.push("a1".to_string());
+    fh.push("a2".to_string());
+    fh.delete(ptr);
+    assert_eq!(fh.pop(), Some("a2".to_string()));
+    assert_eq!(fh.pop(), None);
+}
+
+#[test]
+fn test_delete_8() {
+    let mut fh: FibonacciHeap<String> = FibonacciHeap::new();
+    fh.push("a1".to_string());
+    let ptr = fh.push("a2".to_string());
+    fh.delete(ptr);
+    assert_eq!(fh.pop(), Some("a1".to_string()));
+    assert_eq!(fh.pop(), None);
+}
+
+#[test]
+fn test_delete_9() {
+    let mut fh: FibonacciHeap<String> = FibonacciHeap::new();
+    let ptr1 = fh.push("a1".to_string());
+    let ptr2 = fh.push("a2".to_string());
+    fh.delete(ptr1);
+    fh.delete(ptr2);
+    assert_eq!(fh.pop(), None);
+}
+
+#[test]
+fn test_delete_10() {
+    let mut fh: FibonacciHeap<String> = FibonacciHeap::new();
+    let ptr1 = fh.push("a1".to_string());
+    let ptr2 = fh.push("a2".to_string());
+    fh.delete(ptr2);
+    fh.delete(ptr1);
     assert_eq!(fh.pop(), None);
 }
