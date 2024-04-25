@@ -577,3 +577,121 @@ fn test_decrease_key_5() {
     assert_eq!(fh.pop(), Some("a7".to_string()));
     assert_eq!(fh.pop(), None);
 }
+
+#[test]
+fn test_delete_1() {
+    let mut fh: FibonacciHeap<String> = FibonacciHeap::new();
+    fh.push("a1".to_string());
+    fh.push("a2".to_string());
+    fh.push("a3".to_string());
+    let a4_ptr = fh.push("a4".to_string());
+    fh.push("a5".to_string());
+    fh.push("a6".to_string());
+    fh.push("a7".to_string());
+    assert_eq!(fh.pop(), Some("a1".to_string()));
+    assert_eq!(fh.pop(), Some("a2".to_string()));
+    fh.delete(a4_ptr);
+    assert_eq!(fh.pop(), Some("a3".to_string()));
+    assert_eq!(fh.pop(), Some("a5".to_string()));
+    assert_eq!(fh.pop(), Some("a6".to_string()));
+    assert_eq!(fh.pop(), Some("a7".to_string()));
+    assert_eq!(fh.pop(), None);
+}
+
+#[test]
+fn test_delete_2() {
+    let mut fh: FibonacciHeap<String> = FibonacciHeap::new();
+    let a1_ptr = fh.push("a1".to_string());
+    let a2_ptr = fh.push("a1".to_string());
+    let a3_ptr = fh.push("a1".to_string());
+    let a4_ptr = fh.push("a1".to_string());
+    let a5_ptr = fh.push("a1".to_string());
+    let a6_ptr = fh.push("a1".to_string());
+    let a7_ptr = fh.push("a1".to_string());
+    fh.delete(a1_ptr);
+    fh.delete(a2_ptr);
+    fh.delete(a3_ptr);
+    fh.delete(a4_ptr);
+    fh.delete(a5_ptr);
+    fh.delete(a6_ptr);
+    fh.delete(a7_ptr);
+    assert_eq!(fh.pop(), None);
+}
+
+#[test]
+fn test_delete_3() {
+    let mut fh: FibonacciHeap<String> = FibonacciHeap::new();
+    let a1_ptr = fh.push("a1".to_string());
+    let a2_ptr = fh.push("a1".to_string());
+    let _ = fh.push("a3".to_string());
+    let a4_ptr = fh.push("a1".to_string());
+    let a5_ptr = fh.push("a1".to_string());
+    let a6_ptr = fh.push("a1".to_string());
+    let a7_ptr = fh.push("a1".to_string());
+    fh.delete(a1_ptr);
+    fh.delete(a2_ptr);
+    fh.delete(a4_ptr);
+    fh.delete(a5_ptr);
+    fh.delete(a6_ptr);
+    fh.delete(a7_ptr);
+    assert_eq!(fh.pop(), Some("a3".to_string()));
+    assert_eq!(fh.pop(), None);
+}
+
+#[test]
+fn test_delete_4() {
+    let mut fh: FibonacciHeap<String> = FibonacciHeap::new();
+    let mut fh_wrong: FibonacciHeap<String> = FibonacciHeap::new();
+    fh.push("a1".to_string());
+    fh.push("a2".to_string());
+    fh.push("a3".to_string());
+    let a4_ptr = fh.push("a4".to_string());
+    fh.push("a5".to_string());
+    fh.push("a6".to_string());
+    fh.push("a7".to_string());
+    assert_eq!(fh.pop(), Some("a1".to_string()));
+    assert_eq!(fh.pop(), Some("a2".to_string()));
+    fh_wrong.delete(a4_ptr); // wrong heap: nothing happens
+    assert_eq!(fh.pop(), Some("a3".to_string()));
+    assert_eq!(fh.pop(), Some("a4".to_string()));
+    assert_eq!(fh.pop(), Some("a5".to_string()));
+    assert_eq!(fh.pop(), Some("a6".to_string()));
+    assert_eq!(fh.pop(), Some("a7".to_string()));
+    assert_eq!(fh.pop(), None);
+}
+
+#[test]
+fn test_delete_5() {
+    let mut fh: FibonacciHeap<String> = FibonacciHeap::new();
+    fh.push("a1".to_string());
+    fh.push("a2".to_string());
+    fh.push("a3".to_string());
+    let a4_ptr = fh.push("a4".to_string());
+    fh.push("a5".to_string());
+    fh.push("a6".to_string());
+    fh.push("a7".to_string());
+    assert_eq!(fh.pop(), Some("a1".to_string()));
+    assert_eq!(fh.pop(), Some("a2".to_string()));
+    fh.delete(a4_ptr.clone()); // delete multiple times is OK
+    fh.delete(a4_ptr.clone()); // (nothing happens after first time)
+    fh.delete(a4_ptr.clone()); 
+    fh.delete(a4_ptr.clone()); 
+    fh.delete(a4_ptr.clone()); 
+    fh.delete(a4_ptr.clone()); 
+    fh.delete(a4_ptr.clone()); 
+    fh.delete(a4_ptr.clone()); 
+    fh.delete(a4_ptr.clone()); 
+    fh.delete(a4_ptr.clone()); 
+    fh.delete(a4_ptr.clone()); 
+    fh.delete(a4_ptr.clone()); 
+    fh.delete(a4_ptr.clone()); 
+    fh.delete(a4_ptr.clone()); 
+    fh.delete(a4_ptr.clone()); 
+    fh.delete(a4_ptr.clone()); 
+    fh.delete(a4_ptr.clone()); 
+    assert_eq!(fh.pop(), Some("a3".to_string()));
+    assert_eq!(fh.pop(), Some("a5".to_string()));
+    assert_eq!(fh.pop(), Some("a6".to_string()));
+    assert_eq!(fh.pop(), Some("a7".to_string()));
+    assert_eq!(fh.pop(), None);
+}

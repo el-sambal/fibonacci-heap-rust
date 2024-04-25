@@ -18,6 +18,7 @@ pub struct FibonacciHeap<T> {
 /// This smart pointer keeps track of whether it has been invalidated or not, so you can freely
 /// try to delete an element even if it does not exist in the Fibonacci heap anymore (this will do
 /// nothing, but it won't crash). You can also clone the smart pointer.
+#[derive(Clone)]
 pub struct NodePtr<T>(Rc<RefCell<NodePtrInternal<T>>>);
 
 /// A custom smart pointer to point to an element inside the Fibonacci heap from outside.
