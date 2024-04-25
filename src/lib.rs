@@ -23,6 +23,7 @@ pub struct FibonacciHeap<T> {
 ///
 /// ```
 /// use fibonacci_heap_rust::FibonacciHeap;
+///
 /// let mut heap = FibonacciHeap::<i32>::new();
 /// let ptr1 = heap.push(42); // now we have a pointer that points to the 42 we just inserted
 /// let ptr2 = heap.push(137);
@@ -113,6 +114,7 @@ impl<T: Ord> FibonacciHeap<T> {
     ///
     /// ```
     /// use fibonacci_heap_rust::FibonacciHeap;
+    ///
     /// let mut heap: FibonacciHeap<String> = FibonacciHeap::new();
     /// assert!(heap.is_empty());
     /// ```
@@ -129,16 +131,14 @@ impl<T: Ord> FibonacciHeap<T> {
     ///
     /// ```
     /// use fibonacci_heap_rust::FibonacciHeap;
-    /// let mut heap: FibonacciHeap<String> = FibonacciHeap::new();
     ///
+    /// let mut heap: FibonacciHeap<String> = FibonacciHeap::new();
     /// assert!(heap.is_empty());
     ///
     /// heap.push("Heap is not empty anymore!".to_string());
-    ///
     /// assert!(!heap.is_empty());
     ///
     /// let _ = heap.pop();
-    ///
     /// assert!(heap.is_empty());
     /// ```
     pub fn is_empty(&self) -> bool {
@@ -151,6 +151,7 @@ impl<T: Ord> FibonacciHeap<T> {
     ///
     /// ```
     /// use fibonacci_heap_rust::FibonacciHeap;
+    ///
     /// let mut heap: FibonacciHeap<u32> = FibonacciHeap::new();
     /// assert!(heap.len() == 0);
     ///
@@ -186,6 +187,7 @@ impl<T: Ord> FibonacciHeap<T> {
     ///
     /// ```
     /// use fibonacci_heap_rust::FibonacciHeap;
+    ///
     /// let mut heap1: FibonacciHeap<String> = FibonacciHeap::new();
     /// let mut heap2: FibonacciHeap<String> = FibonacciHeap::new();
     ///
@@ -232,6 +234,7 @@ impl<T: Ord> FibonacciHeap<T> {
     ///
     /// ```
     /// use fibonacci_heap_rust::FibonacciHeap;
+    ///
     /// let mut heap: FibonacciHeap<u32> = FibonacciHeap::new();
     /// assert!(heap.len() == 0);
     ///
@@ -278,13 +281,12 @@ impl<T: Ord> FibonacciHeap<T> {
         }
     }
 
-
     /// Decreases the key of the element pointed to by `elem` from the Fibonacci heap it is in. If this element
     /// does not exist in the heap anymore, or if the entire heap is already dropped, nothing will
     /// happen. If you try to increase the key instead of decreasing it, nothing will happen.
     ///
-    /// If you call this function on some heap `H` and element `x`, in such a way that `x` is/was never an element of
-    /// `H` but of some other heap instead, nothing happens.
+    /// If you call this function on some Fibonacci heap `H` and element `x`, in such a way that `x` is/was never an element of
+    /// `H` but of some other Fibonacci heap instead, the method panics.
     pub fn decrease_key(&mut self, elem: &NodePtr<T>, new_key: T) {
         unsafe fn cut<T: Ord>(
             heap: &mut FibonacciHeap<T>,
@@ -318,9 +320,10 @@ impl<T: Ord> FibonacciHeap<T> {
             return;
         }
         if !std::ptr::eq(elem.0.borrow().heap_ptr, std::ptr::addr_of!(*self)) {
-            // called this function on the wrong element/heap
-            // (this element was never part of this heap)
-            return;
+            panic!(
+                "Oh no... you called some_heap.decrease_key(..) on \
+                an element that was never inserted into this heap!"
+            )
         }
         unsafe {
             let node: *mut Node<T> = elem.0.borrow().ptr;
@@ -341,7 +344,7 @@ impl<T: Ord> FibonacciHeap<T> {
     /// happen. If you try to increase the key instead of decreasing it, nothing will happen.
     ///
     /// If you call this function on some heap `H` and element `x`, in such a way that `x` is/was never an element of
-    /// `H` but of some other heap instead, nothing happens.
+    /// `H` but of some other heap instead, the method panics.
     pub fn delete(&mut self, elem: NodePtr<T>) -> Option<T> {
         unsafe fn cut<T: Ord>(
             heap: &mut FibonacciHeap<T>,
@@ -371,9 +374,10 @@ impl<T: Ord> FibonacciHeap<T> {
             return None;
         }
         if !std::ptr::eq(elem.0.borrow().heap_ptr, std::ptr::addr_of!(*self)) {
-            // called this function on the wrong element/heap
-            // (this element was never part of this heap)
-            return None;
+            panic!(
+                "Oh no... you called some_heap.decrease_key(..) on \
+                an element that was never inserted into this heap!"
+            )
         }
         let node: *mut Node<T> = elem.0.borrow().ptr;
         unsafe {

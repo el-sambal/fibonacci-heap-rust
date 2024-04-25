@@ -510,6 +510,7 @@ fn test_decrease_key_2() {
 }
 
 #[test]
+#[should_panic]
 fn test_decrease_key_3() {
     let mut fh: FibonacciHeap<String> = FibonacciHeap::new();
     let mut fh_wrong: FibonacciHeap<String> = FibonacciHeap::new();
@@ -522,14 +523,7 @@ fn test_decrease_key_3() {
     fh.push("a7".to_string());
     assert_eq!(fh.pop(), Some("a1".to_string()));
     assert_eq!(fh.pop(), Some("a2".to_string()));
-    fh_wrong.decrease_key(&a4_ptr, "a0".to_string()); // wrong heap: nothing happens
-    assert_eq!(fh.pop(), Some("a3".to_string()));
-    assert_eq!(fh.pop(), Some("a4".to_string()));
-    assert_eq!(fh.pop(), Some("a5".to_string()));
-    assert_eq!(fh.pop(), Some("a6".to_string()));
-    assert_eq!(fh.pop(), Some("a7".to_string()));
-    assert_eq!(fh.pop(), None);
-    assert_eq!(fh_wrong.pop(), None);
+    fh_wrong.decrease_key(&a4_ptr, "a0".to_string()); // wrong heap: panic
 }
 
 #[test]
@@ -639,6 +633,7 @@ fn test_delete_3() {
 }
 
 #[test]
+#[should_panic]
 fn test_delete_4() {
     let mut fh: FibonacciHeap<String> = FibonacciHeap::new();
     let mut fh_wrong: FibonacciHeap<String> = FibonacciHeap::new();
@@ -651,13 +646,7 @@ fn test_delete_4() {
     fh.push("a7".to_string());
     assert_eq!(fh.pop(), Some("a1".to_string()));
     assert_eq!(fh.pop(), Some("a2".to_string()));
-    fh_wrong.delete(a4_ptr); // wrong heap: nothing happens
-    assert_eq!(fh.pop(), Some("a3".to_string()));
-    assert_eq!(fh.pop(), Some("a4".to_string()));
-    assert_eq!(fh.pop(), Some("a5".to_string()));
-    assert_eq!(fh.pop(), Some("a6".to_string()));
-    assert_eq!(fh.pop(), Some("a7".to_string()));
-    assert_eq!(fh.pop(), None);
+    fh_wrong.delete(a4_ptr); // wrong heap: panic
 }
 
 #[test]
